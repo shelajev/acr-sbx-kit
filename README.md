@@ -6,17 +6,19 @@ The default ACR version is pinned and its release archive is checked against the
 
 ## Usage
 
-Once published as an OCI kit:
+Allow kits from this GitHub account once (Docker Hub remains allowed):
 
 ```bash
-sbx run codex --kit docker.io/sbx/acr-kit:latest .
+sbx settings set kit.allowedSources '["docker.io/","github.com/shelajev/"]'
 ```
 
-Directly from this Git repository (pin `ref` to a tag or full commit for reproducible use):
+Then run the kit directly from this Git repository:
 
 ```bash
 sbx run codex --kit "git+https://github.com/shelajev/acr-sbx-kit.git#ref=main" .
 ```
+
+For reproducible use, replace `main` with a release tag or full commit SHA.
 
 From a local checkout:
 
@@ -29,7 +31,9 @@ The mixin is agent-independent, so `codex` can be replaced by another Docker San
 To install a different ACR release, pass the version without a leading `v`:
 
 ```bash
-sbx run codex --kit ./acr-sbx-kit --kit-arg acr.version=0.2.1 .
+sbx run codex \
+  --kit "git+https://github.com/shelajev/acr-sbx-kit.git#ref=main" \
+  --kit-arg acr.version=0.2.1 .
 ```
 
 ## Using ACR
