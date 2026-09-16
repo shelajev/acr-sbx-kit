@@ -4,6 +4,8 @@ This mixin installs [Agentic Context Registry (ACR)](https://github.com/jbaruch/
 
 The default ACR version is pinned and its release archive is checked against the publisher's `checksums.txt` before installation. A GitHub credential is optional: public repositories work without one, while a token enables private repositories, higher API limits, and package publishing. The real token remains in Docker Sandboxes' host-side credential proxy.
 
+When a project contains `agents.yaml`, the kit instructs the agent to reconcile and realize its declared ACR packages before beginning substantive work in every session. The agent then rereads the resulting project instructions and uses the materialized skills. This keeps project bootstrap automatic while leaving changes and failures visible to the agent and user.
+
 ## Usage
 
 Allow kits from this GitHub account once (Docker Hub remains allowed):
@@ -50,9 +52,18 @@ acr realize
 
 Use `--agent claude-code`, `--agent codex`, and/or `--agent cursor` to select the layouts ACR should maintain. `acr install` updates dependency state; `acr realize` writes the selected agents' files. Run `acr help COMMAND` for all options.
 
+Commit `agents.yaml` and `.agents/registry.lock` to share the dependency declarations and immutable resolutions with the team. On later sandbox sessions, the agent follows the kit instructions and runs:
+
+```bash
+acr install --non-interactive
+acr realize
+```
+
+Pinned dependencies remain pinned. Dependencies declared as `latest` follow ACR's update and hold policies. When realization introduces skills or session-start hooks that the active agent cannot discover dynamically, the agent will ask for one session restart.
+
 ## GitHub authentication
 
-For public packages, no credential is required. For private packages, increased GitHub API limits, or `acr publish`, bind a GitHub token to the kit's optional `acr-github` service using Docker Sandboxes' credential setup when prompted. The distinct service name avoids colliding with an agent's own GitHub credential declaration. The kit exposes only the `proxy-managed` sentinel as `GH_TOKEN`; the proxy injects the real token into requests to `api.github.com` and `uploads.github.com`.
+For public packages, no credential is required. For private packages, increased GitHub API limits, or `acr publish`, bind a GitHub token to the kit's optional `acr-github` service using Docker Sandboxes' credential setup when prompted. The distinct service name avoids colliding with an agent's own GitHub credential declaration. The kit exposes only the `proxy-managed` sentinel as `GH_TOKEN`; the proxy injects the real token into requests to `api.github.com`, `codeload.github.com`, and `uploads.github.com`.
 
 ## Network policy
 

@@ -23,6 +23,8 @@ credentials:
       inject:
         - domain: api.github.com
           scheme: bearer
+        - domain: codeload.github.com
+          scheme: bearer
         - domain: uploads.github.com
           scheme: bearer
 
@@ -70,12 +72,30 @@ agentInstructions:
     The `acr` CLI is installed. It manages GitHub-hosted packages of agent rules,
     skills, scripts, and hooks in the current project.
 
-    Start with `acr install github:OWNER/REPO`. In a fresh project, avoid an
-    interactive setup prompt by supplying one or more supported agents
-    (`--agent claude-code`, `--agent codex`, or `--agent cursor`), a freshness
-    policy such as `--freshness outdated`, and `--non-interactive`. Then run
-    `acr realize` to materialize the locked package. Use `--dry-run` before
-    mutating commands when you need to inspect their planned file changes.
+    Before beginning substantive work in every session, look for `agents.yaml`
+    at the project root. If it exists, run these commands from that root:
+
+        acr install --non-interactive
+        acr realize
+
+    This is mandatory project bootstrap: it reconciles the declared ACR
+    dependencies and materializes their locked rules, skills, scripts, and
+    hooks for the selected agents. If either command fails, report the failure
+    and its recovery guidance to the user instead of silently proceeding with
+    incomplete agent context.
+
+    After realization, reread the active project instruction file, such as
+    `AGENTS.md` or `CLAUDE.md`, before continuing. Use newly materialized skills
+    when relevant. Some agents discover new skills or session-start hooks only
+    when a new session begins; if that applies, tell the user a restart is
+    required for the new capability to become active.
+
+    In a project without `agents.yaml`, do not initialize ACR automatically.
+    When the user asks to add an ACR package, start with
+    `acr install github:OWNER/REPO`. Avoid an interactive setup prompt by
+    supplying one or more supported agents (`--agent claude-code`, `--agent
+    codex`, or `--agent cursor`), a freshness policy such as `--freshness
+    outdated`, and `--non-interactive`. Then run `acr realize`.
 
     ACR writes `agents.yaml`, `.agents/registry.lock`, and agent-specific files
     into the workspace. Inspect those changes before committing them. Run
